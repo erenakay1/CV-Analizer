@@ -31,11 +31,15 @@ env/
 env.bak/
 venv.bak/
 
-# Environment Variables
+# ─── ENVIRONMENT VARIABLES (KRITIK!) ───────────────
 .env
-.env.local
-.env.*.local
+.env.*
 *.env
+!.env.example
+.env.local
+.env.production
+.env.development
+.env.test
 
 # IDE
 .vscode/
@@ -43,7 +47,6 @@ venv.bak/
 *.swp
 *.swo
 *~
-.DS_Store
 *.code-workspace
 
 # Mac specific
@@ -51,13 +54,13 @@ venv.bak/
 .AppleDouble
 .LSOverride
 ._*
+.Trashes
+Thumbs.db
 
 # Logs
 *.log
 logs/
 *.pid
-*.seed
-*.pid.lock
 
 # Testing
 .pytest_cache/
@@ -65,7 +68,6 @@ logs/
 htmlcov/
 .tox/
 .hypothesis/
-.coverage.*
 coverage.xml
 *.cover
 .cache
@@ -75,18 +77,10 @@ nosetests.xml
 .ipynb_checkpoints
 *.ipynb
 
-# PyCharm
-.idea/
-*.iml
-*.iws
-
 # mypy
 .mypy_cache/
 .dmypy.json
 dmypy.json
-
-# Pyre
-.pyre/
 
 # LangSmith
 .langchain/
@@ -108,7 +102,7 @@ uploaded_cvs/
 !samples/*.pdf
 !samples/*.docx
 
-# Generated/Optimized CVs (output files)
+# Generated CVs
 outputs/
 optimized_cv/
 generated_cv/
@@ -127,7 +121,7 @@ temp/
 *.bak
 *.swp
 
-# Model files (if using local models)
+# Model files
 models/
 *.bin
 *.onnx
@@ -140,17 +134,11 @@ data/
 *.xlsx
 !samples/*.csv
 
-# API keys backup (just in case)
-.env.backup
+# API keys backup
 secrets/
 credentials/
-
-# MacOS
-.Trashes
-Thumbs.db
 
 # Windows
 ehthumbs.db
 Desktop.ini
 $RECYCLE.BIN/
-</parameter>
