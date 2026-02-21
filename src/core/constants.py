@@ -17,7 +17,7 @@ else:
     MAX_CV_CHARS: int = 50_000      # Normal: 50k char
 
 # ─── Agent Pipeline ─────────────────────────────────────
-MAX_CRITIC_RETRIES: int = 2 if QUICK_TEST_MODE else 3
+MAX_CRITIC_RETRIES: int = 1 if QUICK_TEST_MODE else 2
 
 # ─── LLM ─────────────────────────────────────────────────
 DEFAULT_MODEL: str = "gpt-4o-mini"

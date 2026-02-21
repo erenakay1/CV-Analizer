@@ -2,8 +2,6 @@
 cv_critic.py - Agent B: CV Critic
 ----------------------------------
 Analyzer çıktısını denetler.
-Eksik/yanlış varsa -> approved=False -> retry loop.
-Her şey iyiyse -> approved=True -> Optimizer'a geç.
 """
 
 from src.graph.state import CareerPipelineState
@@ -26,10 +24,7 @@ Lütfen bu analizi denet ve JSON formatında döndür."""
 
 
 def cv_critic_node(state: CareerPipelineState) -> dict:
-    """
-    Agent B: CV Critic node.
-    Analyzer çıktısını denet -> approved flag'ini set.
-    """
+    """Agent B: CV Critic node."""
     llm           = get_llm()
     system_prompt = load_prompt("cv_critic")
     user_message  = _USER_TEMPLATE.format(
@@ -43,8 +38,6 @@ def cv_critic_node(state: CareerPipelineState) -> dict:
     ])
 
     raw_output = response.content
-
-    # JSON parse -> approved flag çıkar
     parsed   = safe_json_parse(raw_output)
     approved = parsed.get("critic_review", {}).get("approved", False)
 
