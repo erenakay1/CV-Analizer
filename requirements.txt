@@ -1,0 +1,37 @@
+# ─── Core LangChain ecosystem ────────────────────────
+langchain>=1.2.0
+langchain-openai>=1.1.0
+langchain-core>=1.2.0
+langgraph>=1.0.0
+langsmith>=0.6.0
+
+# ─── LLM + UI ─────────────────────────────────────────
+openai>=2.0.0
+streamlit>=1.38.0
+
+# ─── CV Parsing ───────────────────────────────────────
+PyPDF2>=3.0.1                    # PDF parsing
+pdfplumber>=0.10.0               # Alternative PDF parser
+python-docx>=1.1.0               # DOCX parsing
+mammoth>=1.6.0                   # DOCX to HTML
+
+# ─── NLP & Skill Extraction (Phase 2) ────────────────
+# spacy>=3.7.0                   # Uncomment when needed
+# transformers>=4.36.0
+# sentence-transformers>=2.2.2
+
+# ─── Job Scraping (Phase 2) ───────────────────────────
+requests>=2.31.0                 # HTTP requests
+beautifulsoup4>=4.12.0           # HTML parsing
+# selenium>=4.15.0               # Dynamic scraping (optional)
+lxml>=4.9.3                      # XML/HTML parser
+
+# ─── Validation & Utilities ───────────────────────────
+python-dotenv>=1.0.1
+tiktoken>=0.7.0
+phonenumbers>=8.13.0             # Phone validation
+email-validator>=2.1.0           # Email validation
+
+# ─── Testing ──────────────────────────────────────────
+pytest>=7.4.0
+pytest-cov>=4.1.0
