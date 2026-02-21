@@ -1,0 +1,156 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+pip-wheel-metadata/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# Virtual Environment
+venv/
+ENV/
+env/
+.venv
+env.bak/
+venv.bak/
+
+# Environment Variables
+.env
+.env.local
+.env.*.local
+*.env
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+*.code-workspace
+
+# Mac specific
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+
+# Logs
+*.log
+logs/
+*.pid
+*.seed
+*.pid.lock
+
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+.hypothesis/
+.coverage.*
+coverage.xml
+*.cover
+.cache
+nosetests.xml
+
+# Jupyter Notebook
+.ipynb_checkpoints
+*.ipynb
+
+# PyCharm
+.idea/
+*.iml
+*.iws
+
+# mypy
+.mypy_cache/
+.dmypy.json
+dmypy.json
+
+# Pyre
+.pyre/
+
+# LangSmith
+.langchain/
+langsmith_cache/
+
+# Database
+*.db
+*.sqlite
+*.sqlite3
+
+# ─── PROJECT SPECIFIC ───────────────────────────────
+
+# Uploaded CVs (user data - SENSITIVE!)
+uploads/
+uploaded_cvs/
+*.pdf
+*.docx
+*.doc
+!samples/*.pdf
+!samples/*.docx
+
+# Generated/Optimized CVs (output files)
+outputs/
+optimized_cv/
+generated_cv/
+*.generated.pdf
+*.optimized.docx
+
+# Job scraping cache
+job_cache/
+.scrapy/
+scraped_jobs/
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+*.bak
+*.swp
+
+# Model files (if using local models)
+models/
+*.bin
+*.onnx
+*.pt
+*.pth
+
+# Data files
+data/
+*.csv
+*.xlsx
+!samples/*.csv
+
+# API keys backup (just in case)
+.env.backup
+secrets/
+credentials/
+
+# MacOS
+.Trashes
+Thumbs.db
+
+# Windows
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+</parameter>
