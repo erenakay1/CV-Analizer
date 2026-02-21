@@ -1,4 +1,3 @@
-
 """
 app.py — Streamlit Entry Point
 ───────────────────────────────
@@ -63,6 +62,11 @@ with st.sidebar:
         value=settings.langsmith_ok,
         disabled=True,
     )
+    st.checkbox(
+        "✅ RapidAPI (Jobs)" if settings.rapidapi_ok else "⚠️ RapidAPI Missing (Mock Data)",
+        value=settings.rapidapi_ok,
+        disabled=True,
+    )
 
 
 # ═══════════════════════════════════════════════════════════
@@ -116,22 +120,33 @@ if analyze_btn:
         tmp.write(uploaded_file.read())
         tmp_path = tmp.name
     
-    # Run analysis
-    with st.spinner("🤖 AI Agents analyzing your CV... (30-60 seconds)"):
-        try:
-            cv_data, final_state = run_career_analysis(
-                cv_file_path=tmp_path,
-                cv_file_type=uploaded_file.name.split('.')[-1],
-                target_role=target_role,
-                target_location=target_location,
-            )
-            
-            # Clean up temp file
-            os.unlink(tmp_path)
-            
-        except Exception as e:
-            st.error(f"❌ Analysis failed: {e}")
-            st.stop()
+    # Run analysis with progress
+    progress_bar = st.progress(0, text="Starting analysis...")
+    
+    try:
+        progress_bar.progress(10, text="📄 Parsing CV...")
+        
+        cv_data, final_state = run_career_analysis(
+            cv_file_path=tmp_path,
+            cv_file_type=uploaded_file.name.split('.')[-1],
+            target_role=target_role,
+            target_location=target_location,
+        )
+        
+        progress_bar.progress(100, text="✅ Analysis complete!")
+        
+        # Clean up
+        import time
+        time.sleep(0.5)
+        progress_bar.empty()
+        os.unlink(tmp_path)
+        
+    except Exception as e:
+        progress_bar.empty()
+        st.error(f"❌ Analysis failed: {e}")
+        import traceback
+        st.code(traceback.format_exc())
+        st.stop()
     
     st.success("✅ Analysis complete!")
     
@@ -139,6 +154,24 @@ if analyze_btn:
     analyzer_data = safe_json_parse(final_state["analyzer_output"])
     critic_data   = safe_json_parse(final_state["critic_output"])
     optimizer_data = safe_json_parse(final_state["optimizer_output"])
+    
+    # Job data - SAFE PARSE
+    try:
+        if final_state.get("job_hunter_output"):
+            job_data = safe_json_parse(final_state["job_hunter_output"])
+        else:
+            job_data = {
+                "job_recommendations": [],
+                "search_summary": "Job search not completed",
+                "total_jobs_found": 0
+            }
+    except Exception as e:
+        st.warning(f"⚠️ Job search failed: {e}")
+        job_data = {
+            "job_recommendations": [],
+            "search_summary": "Job search failed",
+            "total_jobs_found": 0
+        }
     
     # ═══════════════════════════════════════════════════════════
     #  RESULTS
@@ -156,68 +189,163 @@ if analyze_btn:
     col3.metric("Issues Found", len(analyzer_data['cv_analysis']['issues']))
     col4.metric("Improvements", len(optimizer_data['improvements']))
     
-    # Tabs
-    tab1, tab2, tab3, tab4 = st.tabs([
+    # Tabs (5 tabs!)
+    tab1, tab2, tab3, tab4, tab5 = st.tabs([
         "📊 Analysis",
         "🔧 Improvements",
+        "💼 Job Matches",
         "🔗 Agent Trace",
         "📋 Summary"
     ])
     
+    # ─── TAB 1: ANALYSIS ────────────────────────────────
     with tab1:
         st.subheader("🔍 Issues Detected")
         
         issues = analyzer_data['cv_analysis']['issues']
-        for issue in issues:
-            severity = issue['severity']
-            severity_class = {
-                'Critical': 'issue-critical',
-                'Warning': 'issue-warning',
-                'Info': 'issue-info'
-            }.get(severity, 'issue-info')
-            
-            with st.expander(f"[{severity}] {issue['category']} - {issue['location']}"):
-                st.markdown(f"**Issue:** {issue['description']}")
-                st.markdown(f"**Suggestion:** {issue['suggestion']}")
-    
-    with tab2:
-        st.subheader("✨ Optimizations")
         
+        if not issues:
+            st.success("🎉 No major issues found!")
+        else:
+            for issue in issues:
+                severity = issue['severity']
+                severity_class = {
+                    'Critical': 'issue-critical',
+                    'Warning': 'issue-warning',
+                    'Info': 'issue-info'
+                }.get(severity, 'issue-info')
+                
+                with st.expander(f"[{severity}] {issue['category']} - {issue['location']}"):
+                    st.markdown(f"**Issue:** {issue['description']}")
+                    st.markdown(f"**Suggestion:** {issue['suggestion']}")
+    
+    # ─── TAB 2: IMPROVEMENTS ────────────────────────────
+    with tab2:
+        st.subheader("✨ Before vs After Comparison")
+        
+        # Download button
         improvements = optimizer_data['improvements']
+        optimized_cv_text = "\n\n".join([
+            f"[{imp['location']}]\n{imp['improved']}"
+            for imp in improvements
+        ])
+        
+        st.download_button(
+            label="📥 Download Optimized CV",
+            data=optimized_cv_text,
+            file_name="optimized_cv.txt",
+            mime="text/plain",
+            use_container_width=True,
+        )
+        
+        st.divider()
+        
         for i, imp in enumerate(improvements, 1):
-            st.markdown(f"#### {i}. {imp['location']} ({imp['issue_category']})")
+            st.markdown(f"### {i}. {imp['location']}")
+            st.caption(f"**Issue:** {imp['issue_category']}")
             
             col_before, col_after = st.columns(2)
             
             with col_before:
-                st.markdown("##### ❌ Before")
-                st.text_area("", imp['original'], height=100, key=f"before_{i}", disabled=True)
+                st.markdown("#### ❌ Original")
+                st.info(imp['original'])
             
             with col_after:
-                st.markdown("##### ✅ After")
-                st.text_area("", imp['improved'], height=100, key=f"after_{i}", disabled=True)
+                st.markdown("#### ✅ Improved")
+                st.success(imp['improved'])
             
-            st.caption(f"💡 {imp['explanation']}")
-            st.divider()
+            st.caption(f"💡 **Why:** {imp['explanation']}")
+            
+            if i < len(improvements):
+                st.divider()
     
+    # ─── TAB 3: JOB MATCHES ─────────────────────────────
     with tab3:
+        st.subheader("💼 Job Recommendations")
+        
+        jobs = job_data.get("job_recommendations", [])
+        
+        if not jobs:
+            st.warning("⚠️ No jobs found or job search not completed.")
+            st.info("""
+            **Possible reasons:**
+            - RapidAPI key not configured (using mock data)
+            - No matching jobs for the target role
+            - API rate limit reached
+            - Job search service unavailable
+            """)
+        else:
+            # Metrics
+            col1, col2, col3 = st.columns(3)
+            col1.metric("Total Jobs", job_data.get("total_jobs_found", 0))
+            col2.metric("Showing Top", len(jobs))
+            col3.metric("Best Match", f"{jobs[0]['match_score']}%" if jobs else "N/A")
+            
+            st.info(job_data.get("search_summary", ""))
+            
+            st.divider()
+            
+            # Job cards
+            for i, job in enumerate(jobs, 1):
+                match_score = job['match_score']
+                match_color = "🟢" if match_score >= 80 else "🟡" if match_score >= 60 else "🔴"
+                
+                with st.expander(f"{match_color} {i}. {job['title']} @ {job['company']} - {match_score}% Match"):
+                    col_info, col_details = st.columns([2, 1])
+                    
+                    with col_info:
+                        st.markdown(f"**🏢 Company:** {job['company']}")
+                        st.markdown(f"**📍 Location:** {job['location']}")
+                        st.markdown(f"**💰 Salary:** {job['salary_range']}")
+                        st.markdown(f"**📅 Posted:** {job.get('posted_at', 'N/A')}")
+                        st.markdown(f"**⏰ Type:** {job.get('employment_type', 'Full-time')}")
+                    
+                    with col_details:
+                        st.metric("Match Score", f"{match_score}%")
+                    
+                    st.markdown("**🎯 Why it matches:**")
+                    for reason in job.get('match_reasons', []):
+                        st.markdown(f"- ✅ {reason}")
+                    
+                    if job.get('url'):
+                        st.link_button("🔗 Apply Now", job['url'], use_container_width=True)
+    
+    # ─── TAB 4: AGENT TRACE ─────────────────────────────
+    with tab4:
         st.subheader("🔗 Agent Debate Trace")
         
         # LangSmith link
         if settings.langsmith_ok:
-            project_name = settings.LANGSMITH_PROJECT
-            st.markdown(f"""
-            ### 🔗 View Full Trace in LangSmith
+            st.markdown("""
+            ### 🔗 View in LangSmith Dashboard
             
-            [Open LangSmith Dashboard →](https://smith.langchain.com/o/YOUR-ORG/projects/p/{project_name})
-            
-            Look for the most recent run named: **CV Analysis - {target_role or 'General'}**
+            Click below to see the full agent debate trace:
             """)
-
+            
+            st.link_button(
+                "🔍 Open LangSmith Trace →",
+                f"https://smith.langchain.com/projects/p/{settings.LANGSMITH_PROJECT}",
+                use_container_width=True,
+            )
+            
+            st.info(f"""
+            **Look for:** Recent run named `CV Analysis - {target_role or 'General'}`
+            
+            **What you'll see:**
+            - Full conversation between agents
+            - Token usage per agent
+            - Latency breakdown
+            - Retry loops
+            """)
+        
+        st.divider()
+        
+        # Agent trace log
+        st.markdown("### 📋 Quick Summary")
         st.markdown(f"""
-        **Retry Count:** {final_state['retry_count']}  
-        **Critic Approved:** {'✅ Yes' if final_state['approved'] else '❌ No (max retry)'}  
-        **Total Steps:** {len(final_state['trace_log'])}
+        - **Retry Count:** {final_state['retry_count']}
+        - **Critic Approved:** {'✅ Yes' if final_state['approved'] else '❌ No (max retry)'}
+        - **Total Steps:** {len(final_state['trace_log'])}
         """)
         
         for entry in final_state['trace_log']:
@@ -225,14 +353,19 @@ if analyze_btn:
             step = entry.get('step', '?')
             st.markdown(f"- **[{agent}]** `{step}`")
     
-    with tab4:
+    # ─── TAB 5: SUMMARY ─────────────────────────────────
+    with tab5:
         st.subheader("📋 Optimization Summary")
         st.info(optimizer_data.get('optimization_summary', 'No summary available'))
         
-        st.markdown("### 💪 Strengths")
-        for strength in analyzer_data['cv_analysis'].get('strengths', []):
-            st.markdown(f"- ✅ {strength}")
+        col1, col2 = st.columns(2)
         
-        st.markdown("### ⚠️ Skill Gaps")
-        for gap in analyzer_data['cv_analysis'].get('skill_gaps', []):
-            st.markdown(f"- 🎯 **{gap['skill']}** ({gap['importance']} priority)")
+        with col1:
+            st.markdown("### 💪 Strengths")
+            for strength in analyzer_data['cv_analysis'].get('strengths', []):
+                st.markdown(f"- ✅ {strength}")
+        
+        with col2:
+            st.markdown("### ⚠️ Skill Gaps")
+            for gap in analyzer_data['cv_analysis'].get('skill_gaps', []):
+                st.markdown(f"- 🎯 **{gap['skill']}** ({gap['importance']} priority)")

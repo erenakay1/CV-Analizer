@@ -1,54 +1,42 @@
+
 import sys
 sys.path.insert(0, '.')
 
-from src.services.career_services import run_career_analysis
-from src.utils.parser import safe_json_parse
+from src.api.job_scraper import search_jobs
 
-print("🧪 Testing FULL Pipeline (Analyzer + Critic + Optimizer)...\n")
-
-# Run full pipeline
-print("⏳ Running full analysis (may take 30-60 seconds)...\n")
-
-cv_data, final_state = run_career_analysis(
-    cv_file_path="samples/test_cv.txt",
-    cv_file_type="txt",
-    target_role="Senior Software Engineer",
-    target_location="Remote"
-)
-
-print("✅ Pipeline completed!\n")
-
-# Parse outputs
-analyzer_output = safe_json_parse(final_state["analyzer_output"])
-critic_output   = safe_json_parse(final_state["critic_output"])
-optimizer_output = safe_json_parse(final_state["optimizer_output"])
-
-# Display results
-print("=" * 60)
-print("PIPELINE RESULTS")
+print("🔍 Testing LinkedIn Jobs Search API\n")
 print("=" * 60)
 
-print(f"\n📊 ANALYZER:")
-print(f"   ATS Score: {analyzer_output['cv_analysis']['ats_score']}/100")
-print(f"   Issues: {len(analyzer_output['cv_analysis']['issues'])}")
+try:
+    jobs = search_jobs(
+        query="Python Developer",
+        location="United States",
+        num_results=5
+    )
+    
+    print(f"✅ SUCCESS! Found {len(jobs)} jobs\n")
+    
+    for i, job in enumerate(jobs, 1):
+        print(f"{i}. {job['title']}")
+        print(f"   🏢 Company: {job['company']}")
+        print(f"   📍 Location: {job['location']}")
+        print(f"   💰 Salary: {job['salary_range']}")
+        print(f"   📅 Posted: {job['posted_at']}")
+        print(f"   🔗 URL: {job['url'][:60]}...")
+        print()
+    
+    # Verify real data
+    first_url = jobs[0]['url']
+    if 'linkedin.com/jobs' in first_url and '3847562' not in first_url:
+        print("=" * 60)
+        print("✅ REAL LINKEDIN DATA CONFIRMED!")
+        print("=" * 60)
+    else:
+        print("⚠️ Data might be mock")
 
-print(f"\n🔎 CRITIC:")
-print(f"   Approved: {final_state['approved']}")
-print(f"   Retry Count: {final_state['retry_count']}")
-print(f"   Missed Issues: {len(critic_output['critic_review']['missed_issues'])}")
-
-print(f"\n🔧 OPTIMIZER:")
-print(f"   Improvements: {len(optimizer_output['improvements'])}")
-print(f"   New ATS Score: {optimizer_output.get('new_ats_score', 'N/A')}")
-
-print(f"\n📋 TRACE LOG:")
-for entry in final_state['trace_log']:
-    agent = entry.get('agent', '?')
-    step = entry.get('step', '?')
-    print(f"   → [{agent}] {step}")
-
-print("\n" + "=" * 60)
-print("✅ Full pipeline test successful!")
-print("=" * 60)
-
-
+except Exception as e:
+    print(f"❌ ERROR: {e}")
+    print("\nPossible fixes:")
+    print("1. Subscribe to API: https://rapidapi.com/jaypat87/api/linkedin-jobs-search")
+    print("2. Check RAPIDAPI_KEY in .env")
+    print("3. Verify subscription is active")

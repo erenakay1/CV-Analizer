@@ -41,6 +41,10 @@ class Settings:
         return bool(self.LANGSMITH_API_KEY)
     
     @property
+    def rapidapi_ok(self) -> bool:
+        return bool(self.RAPIDAPI_KEY)
+
+    @property
     def supported_formats_list(self) -> list[str]:
         return [fmt.strip() for fmt in self.SUPPORTED_FORMATS.split(",")]
 

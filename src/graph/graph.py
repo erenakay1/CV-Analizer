@@ -21,6 +21,7 @@ from src.graph.state import CareerPipelineState
 from src.graph.nodes.cv_analyzer import cv_analyzer_node
 from src.graph.nodes.cv_critic import cv_critic_node
 from src.graph.nodes.cv_optimizer import cv_optimizer_node
+from src.graph.nodes.job_hunter import job_hunter_node  # EKLE!
 from src.graph.nodes.retry import retry_node
 from src.graph.router import critic_router
 
@@ -39,6 +40,7 @@ def build_graph() -> "CompiledStateGraph":
     graph.add_node("cv_critic",    cv_critic_node)
     graph.add_node("retry",        retry_node)
     graph.add_node("cv_optimizer", cv_optimizer_node)
+    graph.add_node("job_hunter",   job_hunter_node)
 
     # ── Edges ──────────────────────────────────────────
     graph.set_entry_point("cv_analyzer")                # START -> analyzer
@@ -55,6 +57,7 @@ def build_graph() -> "CompiledStateGraph":
     )
 
     graph.add_edge("retry", "cv_analyzer")              # retry -> analyzer (loop back)
-    graph.add_edge("cv_optimizer", END)                 # optimizer -> END
+    graph.add_edge("cv_optimizer", "job_hunter")  # EKLE!
+    graph.add_edge("job_hunter", END)              # EKLE!                 # optimizer -> END
 
     return graph.compile()
