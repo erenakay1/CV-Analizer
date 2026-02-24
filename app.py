@@ -92,12 +92,34 @@ uploaded_file = st.file_uploader(
 col1, col2 = st.columns(2)
 target_role = col1.text_input(
     "🎯 Target Role",
-    placeholder="e.g., Senior Software Engineer",
+    placeholder="e.g., Software Engineer, Yazılım Mühendisi",
 )
-target_location = col2.text_input(
-    "📍 Location",
-    placeholder="e.g., Remote / New York",
+
+# Location with helpful options
+location_options = [
+    "Remote",  # Default
+    "Istanbul",
+    "Ankara",
+    "United States",
+    "New York, NY",
+    "San Francisco, CA",
+    "London, UK",
+    "Custom...",
+]
+
+target_location = col2.selectbox(
+    "📍 Location Preference",
+    options=location_options,
+    index=0,  # Default: Remote
+    help="Select 'Remote' for work-from-anywhere positions"
 )
+
+# Custom location input
+if target_location == "Custom...":
+    target_location = st.text_input(
+        "Enter custom location:",
+        placeholder="e.g., Berlin, Germany"
+    )
 
 analyze_btn = st.button("🚀 Analyze CV", type="primary", use_container_width=True)
 
