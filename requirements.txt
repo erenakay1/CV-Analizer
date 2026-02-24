@@ -9,6 +9,10 @@ langsmith>=0.6.0
 openai>=2.0.0
 streamlit>=1.38.0
 
+# ─── API Server ───────────────────────────────────────
+fastapi>=0.133.0
+uvicorn[standard]>=0.41.0
+
 # ─── CV Parsing ───────────────────────────────────────
 PyPDF2>=3.0.1                    # PDF parsing
 pdfplumber>=0.10.0               # Alternative PDF parser
