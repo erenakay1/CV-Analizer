@@ -13,6 +13,7 @@ from datetime import datetime
 from bs4 import BeautifulSoup
 
 from src.core.config import settings
+from src.services.matching import calculate_match_score
 
 logger = logging.getLogger(__name__)
 
@@ -429,33 +430,6 @@ def _parse_jsearch_job(job: Dict) -> Dict:
 #  MATCH SCORE CALCULATION
 # ═══════════════════════════════════════════════════════════
 
-def calculate_match_score(cv_skills: List[str], job_description: str) -> int:
-    """
-    Calculate match score based on skill overlap.
-    
-    Args:
-        cv_skills: List of skills from CV
-        job_description: Job description text
-    
-    Returns:
-        Match score between 40-95
-    """
-    
-    if not cv_skills or not job_description:
-        return 60  # Default moderate score
-    
-    job_lower = job_description.lower()
-    
-    # Count matched skills
-    matched_skills = [skill for skill in cv_skills if skill.lower() in job_lower]
-    
-    # Calculate percentage
-    match_percentage = int((len(matched_skills) / len(cv_skills)) * 100)
-    
-    # Boost slightly for better UX
-    boosted_score = match_percentage + 15
-    
-    # Ensure score is between 40-95
-    final_score = max(40, min(95, boosted_score))
-    
-    return final_score
+#
+# Match skoru `src.services.matching.calculate_match_score`
+# fonksiyonundan sağlanır.

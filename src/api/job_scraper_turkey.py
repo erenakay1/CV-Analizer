@@ -13,6 +13,8 @@ from typing import List, Dict
 from bs4 import BeautifulSoup
 import logging
 
+from src.services.matching import calculate_match_score
+
 logger = logging.getLogger(__name__)
 
 
@@ -338,15 +340,3 @@ def _get_curated_turkish_jobs(query: str, city: str, num_results: int) -> List[D
     logger.info(f"✅ Using {len(selected_jobs)} curated Turkish tech jobs")
     
     return selected_jobs
-
-
-def calculate_match_score(cv_skills: List[str], job_description: str) -> int:
-    """Match score calculation."""
-    if not cv_skills:
-        return 65
-    
-    job_lower = job_description.lower()
-    matched = sum(1 for skill in cv_skills if skill.lower() in job_lower)
-    
-    score = int((matched / len(cv_skills)) * 100)
-    return max(50, min(90, score + 20))
